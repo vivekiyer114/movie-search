@@ -1,17 +1,20 @@
 var gulp = require('gulp');
 var sass = require('gulp-sass');
+var babel = require('gulp-babel');
 var connect = require('gulp-connect');
 
-const paths = {
-    stylesheets:'./src/stylesheets/*.scss',
-    src:'./src',
-}
 
 function watcher(){
+    const paths = {
+        stylesheets:'./src/assets/stylesheets/*.scss',
+        src:'./src',
+        buildCss:'./src/assets/stylesheets'
+    }
+
     function sassCompiler(cb){
         gulp.src(paths.stylesheets)
         .pipe(sass({ errLogToConsole: true }))
-        .pipe(gulp.dest(paths.src));
+        .pipe(gulp.dest(paths.buildCss));
         cb();
     }
     
@@ -41,7 +44,36 @@ function watcher(){
     exports.default = gulp.series(connectServer,watchServer);
 }
 
-watcher();
+function build(){
+    const paths = {
+        dist:'./dist',
+        indexHtml:'./src/index.html',
+        assets:'./src/assets/*/*',
+        buildAssets:'./dist/assets',
+        srcJS:'./src/assets/js/*.js',
+        srcSass:'./src/assets/js/*.js',
+        distJS:'./dist/assets/js',
+    }
 
+    function assets(cb){
+        
+        gulp.src(paths.assets)
+        .pipe(gulp.dest(paths.buildAssets))
+
+        // gulp.src(paths.srcJS)
+        // .pipe(babel())
+        // .pipe(gulp.dest(paths.distJS));
+
+        gulp.src(paths.indexHtml)
+        .pipe(gulp.dest(paths.dist))
+
+        cb();
+
+    }
+
+    exports.build = gulp.series(assets);
+}
+watcher();
+build();
 
 
