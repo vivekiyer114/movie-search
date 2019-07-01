@@ -51,15 +51,17 @@ var MovieApp = (function(){
         
         var sortFunction = sortType === 'title' ? sortByTitle : sortByYear;
 
+        let dataToSort = activeTab === 'personal' ? myMovieData : movieData;
+        
         if (classes.contains('active')){
             el.classList.remove('active');
-            movieData = movieData.reverse()
+            dataToSort = dataToSort.reverse()
         }else{
             el.classList.add('active');
-            movieData = movieData.sort((a,b) => sortFunction(a,b,"ascending"))
+            dataToSort = dataToSort.sort((a,b) => sortFunction(a,b,"ascending"))
         }
 
-        renderMovieList(movieData)
+        renderMovieList(dataToSort)
     }
 
     function sortByYear(a,b,order){
@@ -129,9 +131,23 @@ var MovieApp = (function(){
 
         var searchEl = document.getElementsByClassName('title-search')[0];
         searchEl.addEventListener('keyup',function(e){
-            var searchText = e.target.value;
-            fetchMovieList(searchText)
+            var searchText = e.target.value.toLowerCase();
+            if (activeTab === 'personal'){
+                searchFilterMovieList(searchText)
+            }else{
+                fetchMovieList(searchText)
+            }
         })
+    }
+
+    function searchFilterMovieList(searchText){
+        console.log(searchText)
+        if (searchText){
+            myMovieData = myMovieData.filter(movie => movie.Title.toLowerCase().indexOf(searchText) >= 0);
+        }else{
+            myMovieData = JSON.parse(localStorage.getItem('myMovieData'))
+        }
+        renderMovieList(myMovieData)
     }
 
     function fetchMovieList(search){
@@ -163,7 +179,6 @@ var MovieApp = (function(){
             
             var myMovieDataIds = myMovieData.map(m => m.imdbID);
             const movieExist = myMovieDataIds.indexOf(currentMovie.imdbID) >= 0;
-            console.log(movieExist,currentMovie.Title)
             var movieItem = `
                 <div class='movie-item' >
                     <img src='https://m.media-amazon.com/images/G/01/imdb/images/nopicture/medium/film-3385785534._CB483791896_.png' />
